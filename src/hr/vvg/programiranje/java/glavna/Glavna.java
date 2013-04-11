@@ -3,6 +3,7 @@ package hr.vvg.programiranje.java.glavna;
 import hr.vvg.programiranje.java.banka.DeviznaTransakcija;
 import hr.vvg.programiranje.java.banka.DevizniRacun;
 import hr.vvg.programiranje.java.banka.TekuciRacun;
+import hr.vvg.programiranje.java.banka.Transakcija;
 import hr.vvg.programiranje.java.iznimke.NedozvoljenoStanjeRacunaException;
 import hr.vvg.programiranje.java.iznimke.NepodrzanaValutaException;
 import hr.vvg.programiranje.java.osoba.Osoba;
@@ -27,12 +28,15 @@ public class Glavna {
 		System.out.print("Unesi ime prvog korisnika racuna: ");
 		String ime1 = unos.next();
 		logger.info("Uneseno ime vlasnika prvog raèuna: " + ime1);
+		
 		System.out.print("Unesi prezime prvog korisnika racuna: ");
 		String prezime1 = unos.next();
 		logger.info("Uneseno prezime vlasnika prvog raèuna: " + prezime1);
+		
 		System.out.print("Unesi OIB prvog korisnika racuna: ");
 		String oib1 = unos.next();
 		logger.info("Unesen OIB vlasnika prvog raèuna: " + oib1);
+		
 		Osoba vlasnikRacuna1 = new Osoba(ime1, prezime1, oib1);
 
 		// unos podataka o racunu prvog korisnika
@@ -40,8 +44,10 @@ public class Glavna {
 		System.out.print("Unesi broj prvog racuna: ");
 		String brojRacuna1 = unos.next();
 		logger.info("Unesen broj vlasnika prvog raèuna: " + brojRacuna1);
+		
 		boolean error = false;
 		BigDecimal stanjeRacuna1 = null;
+		
 		do {
 			error = false;
 			System.out.print("Unesi stanje prvog raèuna: ");
@@ -61,6 +67,8 @@ public class Glavna {
 			// a trebas usporedjivat
 			// i dolje isto to imas
 		} while (error == true);
+		
+		
 		TekuciRacun polazniRacun = new TekuciRacun(vlasnikRacuna1,
 				stanjeRacuna1, brojRacuna1);
 
@@ -69,12 +77,15 @@ public class Glavna {
 		System.out.print("Unesi ime drugog korisnika racuna: ");
 		String ime2 = unos.next();
 		logger.info("Uneseno ime korisnika drugog raèuna: " + ime2);
+		
 		System.out.print("Unesi prezime drugog korisnika racuna: ");
 		String prezime2 = unos.next();
 		logger.info("Uneseno prezime korisnika drugog raèuna: " + prezime2);
+		
 		System.out.print("Unesi OIB drugog korisnika racuna: ");
 		String oib2 = unos.next();
 		logger.info("Unesen OIB korisnika drugog raèuna: " + oib2);
+		
 		Osoba vlasnikRacuna2 = new Osoba(ime2, prezime2, oib2);
 
 		// podavi o racunu drugog korisnika
@@ -92,7 +103,7 @@ public class Glavna {
 				logger.info("Uneseno stanje drugog raèuna: " + stanjeRacuna2);
 			} catch (InputMismatchException ex) {
 				error = true;
-				logger.error("Unesen neispravan iznos za stanje prvog raèuna!"
+				logger.error("Unesen neispravan iznos za stanje drugog raèuna!"
 						+ stanjeRacuna2, ex);
 				unos.nextLine();
 
@@ -106,7 +117,6 @@ public class Glavna {
 		// valuta
 
 		String valuta = null;
-		;
 		do {
 			error = false;
 			System.out.print("Unesi valutu drugog racuna: ");
@@ -129,21 +139,25 @@ public class Glavna {
 		System.out.print("Unesi iznos za prebaciti sa prvog na drugi racun: ");
 		BigDecimal iznosZaPrebaciti = unos.nextBigDecimal();
 		logger.info("Unesen iznos transakcije: " + iznosZaPrebaciti);
-		DeviznaTransakcija transakcija = new DeviznaTransakcija(polazniRacun,
+		Transakcija transakcija = new DeviznaTransakcija(polazniRacun,
 				dolazniRacun, iznosZaPrebaciti);
 
 		do {
-			error = false;
-			try {
+				try {
 				transakcija.provediTransakciju();
+				String message = "Uspješna transakcija.";
+				System.out.println(message);
+				logger.info(message);
 			} catch (NedozvoljenoStanjeRacunaException ex) {
-				error = true;
-				unos.nextLine();
+				System.out.println(ex.getMessage());
+				logger.error(ex.getMessage(), ex);
+				//error = true;
+				//unos.nextLine();
 				// malo l je a ne veliko L
 				// veliko znaci da zoves staticku metodu u Logger klasi (a ta
 				// metoda ne postoji, tj nije static)
-				logger.error("Nedovoljno sredstava na raèunu za prebacivanje zeljenog iznosa!"
-						+ ex);
+				//logger.error("Nedovoljno sredstava na raèunu za prebacivanje zeljenog iznosa!"
+					//	+ ex);
 			}
 		} while (error == true);
 		unos.close();
@@ -163,5 +177,6 @@ public class Glavna {
 				+ dolazniRacun.getBrojRacuna()
 				+ ";\nstanje na racunu nakon transakcije: "
 				+ dolazniRacun.getStanjeRacuna() + dolazniRacun.getValuta());
+
 	}
 }

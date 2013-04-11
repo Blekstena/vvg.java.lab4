@@ -9,14 +9,17 @@ import java.math.RoundingMode;
 public class DeviznaTransakcija extends Transakcija implements Devizna {
 
 	private static final BigDecimal TECAJ_EUR_KN = new BigDecimal(7.5);
-	private static final String Podrzana_Valuta = "Euro";
+	private static final String PODRZANA_VALUTA = "Euro";
 
 	// mora ti biti public da ju mozes pozvat u glavnoj klasi
 
-	public static void provjeriValutu(String valuta) {
-		if (Podrzana_Valuta.equals(valuta) == false) {
-			throw new NepodrzanaValutaException("unijeli ste valutu " + valuta
-					+ "koja nije podrzana.");
+	public static Valuta provjeriValutu(String valuta)
+			throws NepodrzanaValutaException {
+		try {
+			return Valuta.valueOf(valuta);
+		} catch (IllegalArgumentException ex) {
+			throw new NepodrzanaValutaException("Valuta " + valuta
+					+ " nije podržana!", ex);
 		}
 	}
 
@@ -25,18 +28,20 @@ public class DeviznaTransakcija extends Transakcija implements Devizna {
 		super(polazniRacun, dolazniRacun, iznosZaPrebaciti);
 	}
 
-	public BigDecimal mjenjacnica(BigDecimal iznosZaPrebaciti, String valuta) {
+	public BigDecimal mjenjacnica(BigDecimal iznosZaPrebaciti, Valuta valuta) {
 
-		if ("EURO".equals(valuta) || "euro".equals(valuta)) {
-			BigDecimal iznos = iznosZaPrebaciti.divide(TECAJ_EUR_KN, 2,
-					RoundingMode.HALF_UP);
-			return iznos;
-		} else
-			return iznosZaPrebaciti;
+		for (Tecaj tecaj : Tecajnica.dohvatiTecajeve()) {
+			if (tecaj.getValuta().compareTo(valuta) == 0) {
+				BigDecimal iznos = iznosZaPrebaciti.divide(
+						tecaj.getTecajPremaKuni(), 2, RoundingMode.HALF_UP);
+				return iznos;
+			}
+		}
+		return iznosZaPrebaciti;
 	}
 
 	@Override
-	public void provediTransakciju() throws NedozvoljenoStanjeRacunaException {
+	public void provediTransakciju() {
 
 		if (polazniRacun.getStanjeRacuna().compareTo(super.iznosZaPrebaciti) == -1) {
 			// zamijenio si iznimke, NedozvoljenoStanjeRacunaException je
